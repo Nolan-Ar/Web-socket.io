@@ -1,0 +1,33 @@
+{
+  "name": "chat_socket.io",
+  "version": "1.0.0",
+  "description": "chat creer avec socket.io",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nolan-Ar/Chat-Socket.io.git"
+  },
+  "keywords": [
+    "chat",
+    "socket",
+    "socket.io",
+    "node",
+    "node.js"
+  ],
+  "author": "Nolan-Ar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nolan-Ar/Chat-Socket.io/issues"
+  },
+  "homepage": "https://github.com/Nolan-Ar/Chat-Socket.io#readme",
+  "dependencies": {
+    "express": "^4.21.1",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}

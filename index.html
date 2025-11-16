@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Socket.io - Application de Chat en Temps Réel</title>
+
+    <style>
+        /* ================================================================ */
+        /* VARIABLES CSS ET CONFIGURATION GLOBALE */
+        /* ================================================================ */
+        :root {
+            /* Palette de couleurs principale */
+            --primary-color: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary-color: #48bb78;
+            --danger-color: #f56565;
+            --warning-color: #ed8936;
+            --info-color: #4299e1;
+
+            /* Couleurs de fond */
+            --bg-main: #1a202c;
+            --bg-secondary: #2d3748;
+            --bg-tertiary: #4a5568;
+            --bg-chat: #2d3748;
+            --bg-message-user: #667eea;
+            --bg-message-other: #4a5568;
+            --bg-message-system: #2d3748;
+            --bg-message-private: #38b2ac;
+
+            /* Couleurs de texte */
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --text-muted: #718096;
+
+            /* Bordures et ombres */
+            --border-color: #4a5568;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+
+            /* Espacements */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+
+            /* Bordures arrondies */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+        }
+
+        /* Reset et configuration de base pour tous les éléments */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Style du body principal */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, var(--bg-main) 0%, #2d3748 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        /* ================================================================ */
+        /* ÉCRAN DE CONNEXION (LOGIN) */
+        /* ================================================================ */
+
+        /* Container principal de l'écran de connexion - centré à l'écran */
+        #login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: var(--spacing-lg);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Carte de connexion avec animation d'entrée */
+        #login-box {
+            background: var(--bg-secondary);
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            max-width: 400px;
+            width: 100%;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        /* Animation de glissement vers le haut pour la carte de connexion */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Titre principal de la page de connexion */
+        #login-box h1 {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+            color: var(--primary-color);
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        /* Conteneur des champs de formulaire */
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        /* Labels des champs de formulaire */
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Champs de saisie texte */
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: var(--spacing-md);
+            background: var(--bg-tertiary);
+            border: 2px solid transparent;
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        /* État focus des champs de saisie */
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        /* Style du select pour la salle */
+        .form-group select {
+            cursor: pointer;
+        }
+
+        /* ================================================================ */
+        /* BOUTONS */
+        /* ================================================================ */
+
+        /* Style de base pour tous les boutons */
+        button, .btn {
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Effet hover sur les boutons */
+        button:hover, .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* État actif (clic) des boutons */
+        button:active, .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Bouton pleine largeur pour le formulaire de connexion */
+        .btn-block {
+            width: 100%;
+            margin-top: var(--spacing-md);
+        }
+
+        /* Bouton secondaire (style alternatif) */
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        /* ================================================================ */
+        /* INTERFACE PRINCIPALE DU CHAT */
+        /* ================================================================ */
+
+        /* Container principal du chat - caché par défaut */
+        #chat-screen {
+            display: none;
+            height: 100vh;
+            padding: var(--spacing-lg);
+        }
+
+        /* Layout en grille pour le chat */
+        #chat-container {
+            display: grid;
+            grid-template-columns: 250px 1fr 250px;
+            grid-template-rows: auto 1fr auto;
+            gap: var(--spacing-md);
+            height: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ================================================================ */
+        /* HEADER DU CHAT */
+        /* ================================================================ */
+
+        /* En-tête avec informations utilisateur et salle */
+        #chat-header {
+            grid-column: 1 / -1;
+            background: var(--bg-secondary);
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        /* Informations utilisateur dans le header */
+        #user-info {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        /* Badge du nom d'utilisateur */
+        .username-badge {
+            background: var(--primary-color);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+        }
+
+        /* Informations de la salle actuelle */
+        .room-info {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+        /* Bouton de déconnexion dans le header */
+        #disconnect-btn {
+            background: var(--danger-color);
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: 0.9em;
+        }
+
+        #disconnect-btn:hover {
+            background: #e53e3e;
+        }
+
+        /* ================================================================ */
+        /* PANNEAU LATÉRAL GAUCHE - SALLES */
+        /* ================================================================ */
+
+        /* Container pour la liste des salles */
+        #rooms-panel {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+        }
+
+        /* Titre du panneau des salles */
+        #rooms-panel h3 {
+            margin-bottom: var(--spacing-md);
+            color: var(--primary-color);
+            font-size: 1.1em;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        /* Liste des salles disponibles */
+        #rooms-list {
+            list-style: none;
+        }
+
+        /* Item de salle individuel */
+        .room-item {
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Effet hover sur les salles */
+        .room-item:hover {
+            background: var(--border-color);
+            transform: translateX(5px);
+        }
+
+        /* Salle actuellement active */
+        .room-item.active {
+            background: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* Badge du nombre d'utilisateurs dans une salle */
+        .room-count {
+            background: var(--bg-main);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            color: var(--text-secondary);
+        }
+
+        /* ================================================================ */
+        /* ZONE PRINCIPALE DES MESSAGES */
+        /* ================================================================ */
+
+        /* Container principal de la zone de chat */
+        #messages-panel {
+            background: var(--bg-chat);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Zone scrollable des messages */
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        /* Personnalisation de la scrollbar */
+        #messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #messages::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+        }
+
+        #messages::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: var(--radius-sm);
+        }
+
+        #messages::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* ================================================================ */
+        /* BULLES DE MESSAGES */
+        /* ================================================================ */
+
+        /* Container d'un message individuel */
+        .message {
+            padding: var(--spacing-md);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-sm);
+            max-width: 70%;
+            word-wrap: break-word;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        /* Animation d'apparition des messages */
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Message envoyé par l'utilisateur actuel */
+        .message.own {
+            background: var(--bg-message-user);
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        /* Message reçu d'un autre utilisateur */
+        .message.other {
+            background: var(--bg-message-other);
+            align-self: flex-start;
+        }
+
+        /* Message système (connexion, déconnexion) */
+        .message.system {
+            background: var(--bg-message-system);
+            align-self: center;
+            text-align: center;
+            font-style: italic;
+            color: var(--text-secondary);
+            max-width: 90%;
+            font-size: 0.9em;
+        }
+
+        /* Message privé */
+        .message.private {
+            background: var(--bg-message-private);
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        /* En-tête du message avec nom et heure */
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        /* Nom de l'utilisateur dans le message */
+        .message-username {
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        /* Timestamp du message */
+        .message-time {
+            font-size: 0.75em;
+            color: var(--text-secondary);
+        }
+
+        /* Contenu du message */
+        .message-content {
+            font-size: 1em;
+            line-height: 1.5;
+        }
+
+        /* Badge "Privé" pour les messages privés */
+        .private-badge {
+            background: var(--secondary-color);
+            padding: 2px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 0.7em;
+            margin-left: var(--spacing-sm);
+            font-weight: 600;
+        }
+
+        /* ================================================================ */
+        /* INDICATEUR DE FRAPPE (TYPING) */
+        /* ================================================================ */
+
+        /* Container de l'indicateur de frappe */
+        #typing-indicator {
+            padding: var(--spacing-sm) var(--spacing-md);
+            min-height: 30px;
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        /* Animation des points de l'indicateur de frappe */
+        .typing-dots {
+            display: inline-block;
+        }
+
+        .typing-dots::after {
+            content: '';
+            animation: typingDots 1.5s infinite;
+        }
+
+        @keyframes typingDots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        /* ================================================================ */
+        /* FORMULAIRE D'ENVOI DE MESSAGE */
+        /* ================================================================ */
+
+        /* Container du formulaire d'envoi */
+        #message-form {
+            display: flex;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            margin-top: var(--spacing-sm);
+        }
+
+        /* Champ de saisie du message */
+        #message-input {
+            flex: 1;
+            padding: var(--spacing-md);
+            background: var(--bg-tertiary);
+            border: 2px solid transparent;
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 1em;
+            resize: none;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        /* État focus du champ de message */
+        #message-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        /* Bouton d'envoi du message */
+        #send-btn {
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: var(--primary-color);
+            min-width: 100px;
+        }
+
+        /* État désactivé du bouton d'envoi */
+        #send-btn:disabled {
+            background: var(--bg-tertiary);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* ================================================================ */
+        /* PANNEAU LATÉRAL DROIT - UTILISATEURS */
+        /* ================================================================ */
+
+        /* Container pour la liste des utilisateurs */
+        #users-panel {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+        }
+
+        /* Titre du panneau des utilisateurs */
+        #users-panel h3 {
+            margin-bottom: var(--spacing-md);
+            color: var(--secondary-color);
+            font-size: 1.1em;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        /* Liste des utilisateurs */
+        #users-list {
+            list-style: none;
+        }
+
+        /* Item utilisateur individuel */
+        .user-item {
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        /* Effet hover sur les utilisateurs */
+        .user-item:hover {
+            background: var(--border-color);
+            transform: translateX(-5px);
+        }
+
+        /* Indicateur de statut en ligne (point vert) */
+        .user-item::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        /* Animation de pulsation pour l'indicateur en ligne */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Badge "Vous" pour l'utilisateur actuel */
+        .user-item.self::after {
+            content: '(Vous)';
+            margin-left: auto;
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* ================================================================ */
+        /* NOTIFICATIONS ET MESSAGES D'ERREUR */
+        /* ================================================================ */
+
+        /* Container des notifications */
+        #notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        /* Notification individuelle */
+        .notification {
+            background: var(--bg-secondary);
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            min-width: 300px;
+            animation: slideInRight 0.3s ease-out;
+            border-left: 4px solid var(--info-color);
+        }
+
+        /* Animation d'entrée des notifications */
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Notification d'erreur */
+        .notification.error {
+            border-left-color: var(--danger-color);
+            background: #742a2a;
+        }
+
+        /* Notification de succès */
+        .notification.success {
+            border-left-color: var(--secondary-color);
+            background: #22543d;
+        }
+
+        /* Notification d'avertissement */
+        .notification.warning {
+            border-left-color: var(--warning-color);
+            background: #744210;
+        }
+
+        /* ================================================================ */
+        /* RESPONSIVE DESIGN - ADAPTATIONS MOBILE */
+        /* ================================================================ */
+
+        /* Pour les tablettes et petits écrans */
+        @media (max-width: 1024px) {
+            #chat-container {
+                grid-template-columns: 200px 1fr 200px;
+            }
+        }
+
+        /* Pour les mobiles */
+        @media (max-width: 768px) {
+            #chat-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr auto auto;
+            }
+
+            #rooms-panel, #users-panel {
+                max-height: 150px;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+
+            #login-box {
+                padding: var(--spacing-lg);
+            }
+        }
+
+        /* ================================================================ */
+        /* UTILITAIRES */
+        /* ================================================================ */
+
+        /* Classe pour cacher des éléments */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Classe pour afficher en flex */
+        .flex {
+            display: flex !important;
+        }
+
+        /* Texte centré */
+        .text-center {
+            text-align: center;
+        }
+
+        /* Espacement en haut */
+        .mt-1 {
+            margin-top: var(--spacing-md);
+        }
+    </style>
+</head>
+<body>
+    <!-- ================================================================ -->
+    <!-- CONTENEUR DES NOTIFICATIONS -->
+    <!-- Affiche les notifications en haut à droite de l'écran -->
+    <!-- ================================================================ -->
+    <div id="notification-container"></div>
+
+    <!-- ================================================================ -->
+    <!-- ÉCRAN DE CONNEXION -->
+    <!-- Premier écran visible permettant à l'utilisateur de se connecter -->
+    <!-- ================================================================ -->
+    <div id="login-screen">
+        <div id="login-box">
+            <h1>💬 Chat Socket.io</h1>
+            <p class="text-center" style="color: var(--text-secondary); margin-bottom: var(--spacing-lg);">
+                Rejoignez la conversation en temps réel
+            </p>
+
+            <!-- Formulaire de connexion -->
+            <form id="login-form">
+                <!-- Champ nom d'utilisateur -->
+                <div class="form-group">
+                    <label for="username-input">Nom d'utilisateur</label>
+                    <input
+                        type="text"
+                        id="username-input"
+                        placeholder="Entrez votre nom"
+                        required
+                        minlength="2"
+                        maxlength="20"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <!-- Sélection de la salle -->
+                <div class="form-group">
+                    <label for="room-select">Salle de chat</label>
+                    <select id="room-select">
+                        <option value="general">🌍 Général</option>
+                        <option value="gaming">🎮 Gaming</option>
+                        <option value="tech">💻 Tech</option>
+                        <option value="music">🎵 Musique</option>
+                        <option value="random">🎲 Random</option>
+                    </select>
+                </div>
+
+                <!-- Bouton de connexion -->
+                <button type="submit" class="btn btn-block">
+                    Rejoindre le chat
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- ÉCRAN PRINCIPAL DU CHAT -->
+    <!-- Interface principale après connexion -->
+    <!-- ================================================================ -->
+    <div id="chat-screen">
+        <div id="chat-container">
+            <!-- ======================================================== -->
+            <!-- HEADER - Informations utilisateur et salle -->
+            <!-- ======================================================== -->
+            <div id="chat-header">
+                <div id="user-info">
+                    <span class="username-badge" id="current-username"></span>
+                    <span class="room-info">
+                        Salle: <strong id="current-room"></strong>
+                        (<span id="users-count">0</span> en ligne)
+                    </span>
+                </div>
+                <button id="disconnect-btn">Déconnexion</button>
+            </div>
+
+            <!-- ======================================================== -->
+            <!-- PANNEAU GAUCHE - Liste des salles -->
+            <!-- ======================================================== -->
+            <div id="rooms-panel">
+                <h3>📁 Salles disponibles</h3>
+                <ul id="rooms-list">
+                    <!-- Les salles seront ajoutées dynamiquement ici -->
+                </ul>
+            </div>
+
+            <!-- ======================================================== -->
+            <!-- PANNEAU CENTRAL - Messages -->
+            <!-- ======================================================== -->
+            <div id="messages-panel">
+                <!-- Zone d'affichage des messages -->
+                <div id="messages">
+                    <!-- Les messages apparaîtront ici dynamiquement -->
+                </div>
+
+                <!-- Indicateur de frappe -->
+                <div id="typing-indicator"></div>
+
+                <!-- Formulaire d'envoi de message -->
+                <form id="message-form">
+                    <textarea
+                        id="message-input"
+                        placeholder="Tapez votre message..."
+                        rows="1"
+                        maxlength="500"
+                    ></textarea>
+                    <button type="submit" id="send-btn">Envoyer</button>
+                </form>
+            </div>
+
+            <!-- ======================================================== -->
+            <!-- PANNEAU DROIT - Liste des utilisateurs -->
+            <!-- ======================================================== -->
+            <div id="users-panel">
+                <h3>👥 Utilisateurs en ligne</h3>
+                <ul id="users-list">
+                    <!-- Les utilisateurs seront ajoutés dynamiquement ici -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- CHARGEMENT DE SOCKET.IO -->
+    <!-- ================================================================ -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- ================================================================ -->
+    <!-- LOGIQUE JAVASCRIPT PRINCIPALE -->
+    <!-- ================================================================ -->
+    <script>
+        // ============================================================
+        // VARIABLES GLOBALES ET CONFIGURATION
+        // ============================================================
+
+        // Variable pour stocker la connexion socket
+        let socket = null;
+
+        // Informations de l'utilisateur actuel
+        let currentUser = {
+            username: '',
+            room: 'general',
+            socketId: ''
+        };
+
+        // Timer pour l'indicateur de frappe (debouncing)
+        let typingTimer = null;
+        const TYPING_TIMER_LENGTH = 1000; // 1 seconde
+
+        // État de frappe de l'utilisateur
+        let isTyping = false;
+
+        // Map pour stocker les utilisateurs qui tapent actuellement
+        const usersTyping = new Set();
+
+        // ============================================================
+        // RÉFÉRENCES AUX ÉLÉMENTS DOM
+        // ============================================================
+
+        // Écrans
+        const loginScreen = document.getElementById('login-screen');
+        const chatScreen = document.getElementById('chat-screen');
+
+        // Formulaires
+        const loginForm = document.getElementById('login-form');
+        const messageForm = document.getElementById('message-form');
+
+        // Inputs
+        const usernameInput = document.getElementById('username-input');
+        const roomSelect = document.getElementById('room-select');
+        const messageInput = document.getElementById('message-input');
+
+        // Zones d'affichage
+        const messagesDiv = document.getElementById('messages');
+        const usersList = document.getElementById('users-list');
+        const roomsList = document.getElementById('rooms-list');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        // Informations affichées
+        const currentUsernameSpan = document.getElementById('current-username');
+        const currentRoomSpan = document.getElementById('current-room');
+        const usersCountSpan = document.getElementById('users-count');
+
+        // Boutons
+        const disconnectBtn = document.getElementById('disconnect-btn');
+        const sendBtn = document.getElementById('send-btn');
+
+        // Container de notifications
+        const notificationContainer = document.getElementById('notification-container');
+
+        // ============================================================
+        // FONCTIONS UTILITAIRES
+        // ============================================================
+
+        /**
+         * Affiche une notification à l'utilisateur
+         * @param {string} message - Le message à afficher
+         * @param {string} type - Le type de notification (error, success, warning, info)
+         */
+        function showNotification(message, type = 'info') {
+            // Création de l'élément notification
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+
+            // Ajout au container
+            notificationContainer.appendChild(notification);
+
+            // Suppression automatique après 4 secondes
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        /**
+         * Formate un timestamp en heure lisible (HH:MM)
+         * @param {number} timestamp - Le timestamp à formater
+         * @returns {string} L'heure formatée
+         */
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        /**
+         * Scroll automatiquement vers le bas de la zone de messages
+         */
+        function scrollToBottom() {
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        /**
+         * Nettoie le HTML pour éviter les injections XSS
+         * @param {string} text - Le texte à nettoyer
+         * @returns {string} Le texte sécurisé
+         */
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ============================================================
+        // FONCTIONS D'AFFICHAGE DES MESSAGES
+        // ============================================================
+
+        /**
+         * Affiche un message dans la zone de chat
+         * @param {Object} msg - L'objet message à afficher
+         */
+        function displayMessage(msg) {
+            const messageDiv = document.createElement('div');
+
+            // Détermination du type de message et application de la classe CSS appropriée
+            if (msg.type === 'system') {
+                // Message système (connexion/déconnexion)
+                messageDiv.className = 'message system';
+                messageDiv.innerHTML = `
+                    <div class="message-content">${escapeHtml(msg.message)}</div>
+                `;
+            } else if (msg.type === 'private') {
+                // Message privé
+                messageDiv.className = 'message private';
+                const isOwn = msg.fromSocketId === socket.id;
+                const displayName = isOwn ? `À ${msg.to}` : `De ${msg.from}`;
+
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <span class="message-username">
+                            ${escapeHtml(displayName)}
+                            <span class="private-badge">Privé</span>
+                        </span>
+                        <span class="message-time">${formatTime(msg.timestamp)}</span>
+                    </div>
+                    <div class="message-content">${escapeHtml(msg.message)}</div>
+                `;
+            } else {
+                // Message utilisateur normal
+                const isOwn = msg.socketId === socket.id;
+                messageDiv.className = `message ${isOwn ? 'own' : 'other'}`;
+
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <span class="message-username">${escapeHtml(msg.username)}</span>
+                        <span class="message-time">${formatTime(msg.timestamp)}</span>
+                    </div>
+                    <div class="message-content">${escapeHtml(msg.message)}</div>
+                `;
+            }
+
+            // Ajout du message au container et scroll automatique
+            messagesDiv.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        /**
+         * Affiche l'historique des messages lors de la connexion
+         * @param {Array} history - Tableau des messages historiques
+         */
+        function displayMessageHistory(history) {
+            messagesDiv.innerHTML = ''; // Vide la zone de messages
+            history.forEach(msg => displayMessage(msg));
+        }
+
+        // ============================================================
+        // GESTION DE LA LISTE DES UTILISATEURS
+        // ============================================================
+
+        /**
+         * Met à jour la liste des utilisateurs connectés
+         * @param {Array} users - Tableau des utilisateurs
+         */
+        function updateUsersList(users) {
+            usersList.innerHTML = '';
+            usersCountSpan.textContent = users.length;
+
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.className = 'user-item';
+
+                // Marque l'utilisateur actuel
+                if (user.socketId === socket.id) {
+                    li.classList.add('self');
+                }
+
+                li.textContent = user.username;
+
+                // Ajout d'un événement de clic pour envoyer un message privé
+                if (user.socketId !== socket.id) {
+                    li.addEventListener('click', () => {
+                        const msg = prompt(`Message privé à ${user.username}:`);
+                        if (msg && msg.trim()) {
+                            socket.emit('private_message', {
+                                targetSocketId: user.socketId,
+                                message: msg.trim()
+                            });
+                        }
+                    });
+                    li.style.cursor = 'pointer';
+                    li.title = 'Cliquez pour envoyer un message privé';
+                }
+
+                usersList.appendChild(li);
+            });
+        }
+
+        // ============================================================
+        // GESTION DE LA LISTE DES SALLES
+        // ============================================================
+
+        /**
+         * Met à jour la liste des salles disponibles
+         * @param {Array} rooms - Tableau des salles
+         */
+        function updateRoomsList(rooms) {
+            roomsList.innerHTML = '';
+
+            rooms.forEach(room => {
+                const li = document.createElement('li');
+                li.className = 'room-item';
+
+                // Marque la salle actuelle
+                if (room.name === currentUser.room) {
+                    li.classList.add('active');
+                }
+
+                li.innerHTML = `
+                    <span>${escapeHtml(room.name)}</span>
+                    <span class="room-count">${room.usersCount}</span>
+                `;
+
+                // Permet de changer de salle en cliquant
+                li.addEventListener('click', () => {
+                    if (room.name !== currentUser.room) {
+                        changeRoom(room.name);
+                    }
+                });
+
+                roomsList.appendChild(li);
+            });
+        }
+
+        /**
+         * Change de salle de chat
+         * @param {string} newRoom - Le nom de la nouvelle salle
+         */
+        function changeRoom(newRoom) {
+            socket.emit('change_room', { room: newRoom });
+        }
+
+        // ============================================================
+        // GESTION DE L'INDICATEUR DE FRAPPE
+        // ============================================================
+
+        /**
+         * Met à jour l'affichage de l'indicateur de frappe
+         */
+        function updateTypingIndicator() {
+            if (usersTyping.size === 0) {
+                typingIndicator.textContent = '';
+            } else if (usersTyping.size === 1) {
+                const username = Array.from(usersTyping)[0];
+                typingIndicator.innerHTML = `<span class="typing-dots">${escapeHtml(username)} est en train d'écrire</span>`;
+            } else if (usersTyping.size === 2) {
+                const users = Array.from(usersTyping);
+                typingIndicator.innerHTML = `<span class="typing-dots">${escapeHtml(users[0])} et ${escapeHtml(users[1])} sont en train d'écrire</span>`;
+            } else {
+                typingIndicator.innerHTML = `<span class="typing-dots">Plusieurs personnes sont en train d'écrire</span>`;
+            }
+        }
+
+        // ============================================================
+        // CONNEXION AU SERVEUR SOCKET.IO
+        // ============================================================
+
+        /**
+         * Établit la connexion socket et configure tous les événements
+         */
+        function connectToChat() {
+            // Connexion au serveur
+            socket = io();
+
+            // ========================================================
+            // ÉVÉNEMENT: Connexion réussie
+            // ========================================================
+            socket.on('connect', () => {
+                console.log('Connecté au serveur socket');
+                currentUser.socketId = socket.id;
+
+                // Envoi de la demande de connexion au chat
+                socket.emit('join', {
+                    username: currentUser.username,
+                    room: currentUser.room
+                });
+            });
+
+            // ========================================================
+            // ÉVÉNEMENT: Connexion au chat réussie
+            // ========================================================
+            socket.on('join_success', (data) => {
+                console.log('Connexion au chat réussie:', data);
+                showNotification(`Bienvenue dans la salle ${data.room}!`, 'success');
+
+                // Mise à jour de l'interface
+                loginScreen.style.display = 'none';
+                chatScreen.style.display = 'block';
+                currentUsernameSpan.textContent = data.username;
+                currentRoomSpan.textContent = data.room;
+                usersCountSpan.textContent = data.usersCount;
+
+                // Focus sur le champ de message
+                messageInput.focus();
+
+                // Demande la liste des salles
+                socket.emit('get_rooms');
+            });
+
+            // ========================================================
+            // ÉVÉNEMENT: Historique des messages
+            // ========================================================
+            socket.on('message_history', (history) => {
+                displayMessageHistory(history);
+            });
+
+            // ========================================================
+            // ÉVÉNEMENT: Nouveau message reçu
+            // ========================================================
+            socket.on('received_message', (msg) => {
+                displayMessage(msg);
+            });
+
+            // ========================================================
+            // ÉVÉNEMENT: Utilisateur a rejoint
+            // ========================================================
+            socket.on('user_joined', (msg) => {
+                displayMessage(msg);
+                showNotification(msg.message, 'info');
+            });
+
+            // ========================================================
+            // ÉVÉNEMENT: Utilisateur a quitté
+            // ========================================================
+            socket.on('user_left', (msg) => {
+                displayMessage(msg);
+            });
+
+            // ========================================================
+            // ÉVÉNEMENT: Mise à jour de la liste des utilisateurs
+            // ========================================================
+            socket.on('users_list', (users) => {
+                updateUsersList(users);
+            });
+
+            // ========================================================
+            // ÉVÉNEMENT: Mise à jour de la liste des salles
+            // ========================================================
+            socket.on('rooms_list', (rooms) => {
+                updateRoomsList(rooms);
+            });
+
+            // ========================================================
+            // ÉVÉNEMENT: Utilisateur en train de taper
+            // ========================================================
+            socket.on('user_typing', (data) => {
+                if (data.isTyping) {
+                    usersTyping.add(data.username);
+                } else {
+                    usersTyping.delete(data.username);
+                }
+                updateTypingIndicator();
+            });
+
+            // ========================================================
+            // ÉVÉNEMENT: Message privé reçu
+            // ========================================================
+            socket.on('private_message_received', (msg) => {
+                displayMessage(msg);
+                showNotification(`Nouveau message privé de ${msg.from}`, 'info');
+            });
+
+            // ========================================================
+            // ÉVÉNEMENT: Message privé envoyé (confirmation)
+            // ========================================================
+            socket.on('private_message_sent', (msg) => {
+                displayMessage(msg);
+            });
+
+            // ========================================================
+            // ÉVÉNEMENT: Changement de salle réussi
+            // ========================================================
+            socket.on('room_changed', (data) => {
+                currentUser.room = data.room;
+                currentRoomSpan.textContent = data.room;
+                usersCountSpan.textContent = data.usersCount;
+                showNotification(`Vous avez rejoint la salle ${data.room}`, 'success');
+
+                // Mise à jour de la liste des salles
+                socket.emit('get_rooms');
+            });
+
+            // ========================================================
+            // ÉVÉNEMENT: Erreur
+            // ========================================================
+            socket.on('error', (data) => {
+                showNotification(data.message, 'error');
+            });
+
+            // ========================================================
+            // ÉVÉNEMENT: Déconnexion
+            // ========================================================
+            socket.on('disconnect', () => {
+                console.log('Déconnecté du serveur');
+                showNotification('Connexion perdue. Tentative de reconnexion...', 'warning');
+            });
+        }
+
+        // ============================================================
+        // GESTIONNAIRES D'ÉVÉNEMENTS DOM
+        // ============================================================
+
+        /**
+         * Gestion de la soumission du formulaire de connexion
+         */
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const username = usernameInput.value.trim();
+            const room = roomSelect.value;
+
+            // Validation du nom d'utilisateur
+            if (username.length < 2) {
+                showNotification('Le nom d\'utilisateur doit contenir au moins 2 caractères', 'error');
+                return;
+            }
+
+            if (username.length > 20) {
+                showNotification('Le nom d\'utilisateur ne peut pas dépasser 20 caractères', 'error');
+                return;
+            }
+
+            // Sauvegarde des informations
+            currentUser.username = username;
+            currentUser.room = room;
+
+            // Sauvegarde dans localStorage pour la prochaine visite
+            localStorage.setItem('chat_username', username);
+            localStorage.setItem('chat_room', room);
+
+            // Connexion au chat
+            connectToChat();
+        });
+
+        /**
+         * Gestion de l'envoi d'un message
+         */
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const message = messageInput.value.trim();
+
+            // Vérification que le message n'est pas vide
+            if (!message) {
+                return;
+            }
+
+            // Envoi du message au serveur
+            socket.emit('chat_message', { message });
+
+            // Réinitialisation du champ
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+
+            // Arrêt de l'indicateur de frappe
+            if (isTyping) {
+                socket.emit('typing', { isTyping: false });
+                isTyping = false;
+            }
+        });
+
+        /**
+         * Gestion de la frappe dans le champ de message
+         */
+        messageInput.addEventListener('input', () => {
+            // Auto-resize du textarea
+            messageInput.style.height = 'auto';
+            messageInput.style.height = messageInput.scrollHeight + 'px';
+
+            // Gestion de l'indicateur de frappe avec debouncing
+            clearTimeout(typingTimer);
+
+            if (!isTyping && messageInput.value.trim()) {
+                isTyping = true;
+                socket.emit('typing', { isTyping: true });
+            }
+
+            typingTimer = setTimeout(() => {
+                if (isTyping) {
+                    isTyping = false;
+                    socket.emit('typing', { isTyping: false });
+                }
+            }, TYPING_TIMER_LENGTH);
+        });
+
+        /**
+         * Gestion du bouton de déconnexion
+         */
+        disconnectBtn.addEventListener('click', () => {
+            if (confirm('Voulez-vous vraiment vous déconnecter?')) {
+                // Déconnexion du socket
+                if (socket) {
+                    socket.disconnect();
+                }
+
+                // Retour à l'écran de connexion
+                chatScreen.style.display = 'none';
+                loginScreen.style.display = 'flex';
+
+                // Réinitialisation des données
+                messagesDiv.innerHTML = '';
+                usersTyping.clear();
+                updateTypingIndicator();
+
+                showNotification('Vous avez été déconnecté', 'info');
+            }
+        });
+
+        /**
+         * Support de la touche Entrée pour envoyer (Shift+Entrée pour nouvelle ligne)
+         */
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                messageForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // ============================================================
+        // INITIALISATION AU CHARGEMENT DE LA PAGE
+        // ============================================================
+
+        window.addEventListener('load', () => {
+            // Récupération des données sauvegardées
+            const savedUsername = localStorage.getItem('chat_username');
+            const savedRoom = localStorage.getItem('chat_room');
+
+            // Pré-remplissage du formulaire si des données existent
+            if (savedUsername) {
+                usernameInput.value = savedUsername;
+            }
+
+            if (savedRoom) {
+                roomSelect.value = savedRoom;
+            }
+
+            // Focus sur le champ de nom d'utilisateur
+            usernameInput.focus();
+
+            console.log('Application de chat Socket.io chargée et prête!');
+        });
+
+        // ============================================================
+        // ACTUALISATION PÉRIODIQUE DE LA LISTE DES SALLES
+        // ============================================================
+
+        // Demande la liste des salles toutes les 10 secondes si connecté
+        setInterval(() => {
+            if (socket && socket.connected) {
+                socket.emit('get_rooms');
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
