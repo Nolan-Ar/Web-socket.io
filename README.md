@@ -6,20 +6,20 @@ Une application de chat moderne et complète développée avec Node.js, Express 
 ![Socket.io](https://img.shields.io/badge/Socket.io-v4.8.1-blue)
 ![License](https://img.shields.io/badge/license-ISC-blue)
 
-## ✨ Fonctionnalités
+## Fonctionnalités
 
-- 💬 **Chat en temps réel** - Messages instantanés avec Socket.io
-- 🏠 **Multi-salles** - Créez et rejoignez différentes salles de discussion
-- 👥 **Liste des utilisateurs** - Voyez qui est connecté en temps réel
-- 📨 **Messages privés** - Envoyez des messages privés aux utilisateurs
-- ⌨️ **Indicateur de frappe** - Voyez quand les autres utilisateurs tapent
-- 🔒 **Sécurité** - Protection XSS et rate limiting anti-spam
-- 📜 **Historique** - Les nouveaux utilisateurs voient les 100 derniers messages
-- 🎨 **Interface moderne** - Design responsive et élégant
-- 🔔 **Notifications** - Alertes pour les événements importants
-- 💾 **Persistance** - Sauvegarde du nom d'utilisateur dans le navigateur
+- **Chat en temps réel** - Messages instantanés avec Socket.io
+- **Multi-salles** - Créez et rejoignez différentes salles de discussion
+- **Liste des utilisateurs** - Voyez qui est connecté en temps réel
+- **Messages privés** - Envoyez des messages privés aux utilisateurs
+- **Indicateur de frappe** - Voyez quand les autres utilisateurs tapent
+- **Sécurité** - Protection XSS et rate limiting anti-spam
+- **Historique** - Les nouveaux utilisateurs voient les 100 derniers messages
+- **Interface moderne** - Design responsive et élégant
+- **Notifications** - Alertes pour les événements importants
+- **Persistance** - Sauvegarde du nom d'utilisateur dans le navigateur
 
-## 📋 Prérequis
+##📋 Prérequis
 
 Avant de commencer, assurez-vous d'avoir installé :
 
@@ -34,7 +34,7 @@ node --version   # Doit afficher v14.0.0 ou supérieur
 npm --version    # Doit afficher une version de npm
 ```
 
-## 🚀 Installation Rapide
+## Installation Rapide
 
 ### Option 1 : Installation Standard
 
@@ -61,7 +61,7 @@ npm start
 
 Accédez à [http://localhost:3000](http://localhost:3000)
 
-C'est tout ! L'application est prête à être utilisée. 🎉
+C'est tout ! L'application est prête à être utilisée.
 
 ### Option 2 : Installation avec Nodemon (Développement)
 
@@ -72,7 +72,7 @@ npm install
 npm run dev
 ```
 
-## 📦 Scripts Disponibles
+## Scripts Disponibles
 
 ```bash
 npm start          # Lance le serveur en mode production
@@ -80,7 +80,7 @@ npm run dev        # Lance le serveur avec Nodemon (rechargement auto)
 npm test           # Exécute les tests (à configurer)
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Variables d'Environnement
 
@@ -109,7 +109,7 @@ const io = require("socket.io")(http, {
 });
 ```
 
-## 🎮 Utilisation
+## Utilisation
 
 ### Première Connexion
 
@@ -120,11 +120,11 @@ const io = require("socket.io")(http, {
 
 ### Salles Disponibles
 
-- 🌍 **Général** - Discussion générale
-- 🎮 **Gaming** - Pour les gamers
-- 💻 **Tech** - Discussions techniques
-- 🎵 **Musique** - Parlez musique
-- 🎲 **Random** - Discussions aléatoires
+**Général** - Discussion générale
+**Gaming** - Pour les gamers
+**Tech** - Discussions techniques
+**Musique** - Parlez musique
+**Random** - Discussions aléatoires
 
 ### Fonctionnalités Avancées
 
@@ -136,7 +136,7 @@ const io = require("socket.io")(http, {
 
 **Envoi rapide** : Appuyez sur `Entrée` pour envoyer (Shift+Entrée pour nouvelle ligne)
 
-## 🏗️ Structure du Projet
+## Structure du Projet
 
 ```
 Chat-Socket.io/
@@ -149,7 +149,7 @@ Chat-Socket.io/
 └── README.md             # Ce fichier
 ```
 
-## 🛠️ Technologies Utilisées
+## Technologies Utilisées
 
 ### Backend
 
@@ -165,7 +165,7 @@ Chat-Socket.io/
 - **JavaScript ES6+** - Logique client
 - **Socket.io Client** - Client Socket.io
 
-## 🔒 Sécurité
+## Sécurité
 
 L'application implémente plusieurs mesures de sécurité :
 
@@ -175,7 +175,7 @@ L'application implémente plusieurs mesures de sécurité :
 - **Limitation de taille** : Messages limités à 500 caractères
 - **Échappement HTML** : Prévention des injections de code
 
-## 🐛 Dépannage
+## Dépannage
 
 ### Le serveur ne démarre pas
 
@@ -207,7 +207,7 @@ npm install
 - Assurez-vous que WebSocket est supporté par votre navigateur
 - Essayez en navigation privée pour éliminer les problèmes de cache
 
-## 📝 Développement
+## Développement
 
 ### Ajouter une nouvelle salle
 
@@ -240,7 +240,7 @@ if (history.length >= 100) {  // Changez 100 par votre valeur
 }
 ```
 
-## 🤝 Contribution
+## Contribution
 
 Les contributions sont les bienvenues ! N'hésitez pas à :
 
@@ -250,24 +250,24 @@ Les contributions sont les bienvenues ! N'hésitez pas à :
 4. Push vers la branche (`git push origin feature/AmazingFeature`)
 5. Ouvrir une Pull Request
 
-## 📜 Licence
+## Licence
 
 Ce projet est sous licence ISC. Voir le fichier `package.json` pour plus de détails.
 
-## 👤 Auteur
+## Auteur
 
 **Nolan-Ar**
 
 - GitHub: [@Nolan-Ar](https://github.com/Nolan-Ar)
 - Projet: [Chat-Socket.io](https://github.com/Nolan-Ar/Chat-Socket.io)
 
-## 🙏 Remerciements
+## Remerciements
 
 - Socket.io pour leur excellente bibliothèque
 - La communauté Node.js
 - Tous les contributeurs du projet
 
-## 📞 Support
+## Support
 
 Si vous rencontrez des problèmes :
 
@@ -277,6 +277,5 @@ Si vous rencontrez des problèmes :
 
 ---
 
-⭐ Si vous aimez ce projet, n'hésitez pas à lui donner une étoile sur GitHub !
+Si vous aimez ce projet, n'hésitez pas à lui donner une étoile sur GitHub !
 
-**Fait avec ❤️ et Node.js**
