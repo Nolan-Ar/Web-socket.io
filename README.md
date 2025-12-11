@@ -1,4 +1,4 @@
-# 💬 Chat Socket.io - Application de Chat en Temps Réel
+# Chat Socket.io - Application de Chat en Temps Réel
 
 Une application de chat moderne et complète développée avec Node.js, Express et Socket.io. Profitez de conversations en temps réel avec support multi-salles, messages privés et indicateurs de frappe.
 
